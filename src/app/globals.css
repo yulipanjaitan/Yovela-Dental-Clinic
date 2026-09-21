@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+:root {
+  --font-poppins: 'Poppins', sans-serif;
+  --color-mint: #26d4a5;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Efek Hover Kursor Halus untuk Komponen Interaktif */
+.hover-lift {
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px -4px rgba(38, 212, 165, 0.18);
+}
+
+/* Kursor Hover Permukaan Segmen Gigi Odontogram */
+.tooth-segment {
+  transition: fill 0.15s ease, stroke 0.15s ease, filter 0.15s ease;
+}
+.tooth-segment:hover {
+  filter: drop-shadow(0 0 3px #26d4a5) brightness(1.08);
+  stroke: #26d4a5 !important;
+  stroke-width: 2.2px !important;
+  cursor: pointer;
+}
