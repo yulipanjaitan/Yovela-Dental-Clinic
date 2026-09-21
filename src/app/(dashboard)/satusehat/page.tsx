@@ -6,9 +6,9 @@ import {
   getStoredPatients, 
   saveStoredPatients, 
   PatientRecord 
-} from '../../data/patientDatabase';
-import { DIAGNOSES, TREATMENTS } from '../../data/mockData';
-import { useAuth } from '../../context/AuthContext';
+} from '../../../data/patientDatabase';
+import { DIAGNOSES, TREATMENTS } from '../../../data/mockData';
+import { useAuth } from '../../../context/AuthContext';
 
 interface SyncLog {
   id: string;

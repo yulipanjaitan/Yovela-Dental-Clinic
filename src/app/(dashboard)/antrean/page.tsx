@@ -7,8 +7,8 @@ import {
   saveStoredPatients, 
   setActivePatient, 
   PatientRecord 
-} from '../../data/patientDatabase';
-import { useAuth } from '../../context/AuthContext';
+} from '../../../data/patientDatabase';
+import { useAuth } from '../../../context/AuthContext';
 
 export default function AntreanPoliPage() {
   const { currentUser } = useAuth();

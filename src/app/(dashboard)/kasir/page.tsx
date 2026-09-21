@@ -6,10 +6,10 @@ import {
   getStoredPatients, 
   saveStoredPatients, 
   PatientRecord 
-} from '../../data/patientDatabase';
-import { TREATMENTS, Treatment } from '../../data/mockData';
-import { InvoiceReceipt } from '../../components/InvoiceReceipt';
-import { useAuth } from '../../context/AuthContext';
+} from '../../../data/patientDatabase';
+import { TREATMENTS, Treatment } from '../../../data/mockData';
+import { InvoiceReceipt } from '../../../components/InvoiceReceipt';
+import { useAuth } from '../../../context/AuthContext';
 
 interface TransactionItem {
   id: string;
@@ -163,50 +163,8 @@ export default function KasirBillingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-slate-800 font-['Poppins',sans-serif] flex flex-col antialiased pb-12">
-      {/* 1. TOP HEADER BRANDED */}
-      <header className="bg-white/95 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-40 px-4 sm:px-6 lg:px-8 xl:px-10 py-3 shadow-xs print:hidden">
-        <div className="max-w-[1440px] w-full mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href="/" className="flex items-center gap-2.5 group cursor-pointer" title="Kembali ke Pemeriksaan Poli">
-              <div className="w-9 h-9 rounded-xl bg-[#26d4a5]/15 border border-[#26d4a5]/30 flex items-center justify-center p-2 group-hover:scale-105 transition duration-200 shadow-2xs">
-                <svg viewBox="0 0 512 512" className="w-full h-full fill-[#26d4a5]">
-                  <path d="M416 112c-35.3 0-64 28.7-64 64v51.2c0 23.4-12.2 44.9-32.3 56.8L272 312.6l-47.7-28.6c-20.1-12-32.3-33.5-32.3-56.8V176c0-35.3-28.7-64-64-64S64 140.7 64 176c0 86.8 52.3 162.7 128 193.3V432c0 17.7 14.3 32 32 32h64c17.7 0 32-14.3 32-32V369.3c75.7-30.6 128-106.5 128-193.3c0-35.3-28.7-64-64-64z" />
-                </svg>
-              </div>
-              <div>
-                <h1 className="text-sm font-extrabold tracking-tight text-slate-900 group-hover:text-[#20b88f] transition">
-                  Yovela Dental Clinic
-                </h1>
-                <p className="text-[10px] text-slate-400 font-medium">Instalasi Kasir, Billing & Cetak Struk Termal</p>
-              </div>
-            </Link>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Link
-              href="/antrean"
-              className="px-3.5 py-1.5 rounded-xl border border-slate-200 hover:border-[#26d4a5] bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center gap-2 transition cursor-pointer shadow-2xs"
-            >
-              <i className="fa-solid fa-clock-rotate-left text-[#0fa882]" />
-              <span>Antrean Poli ({pendingPatients.length} Tagihan)</span>
-            </Link>
-
-            <div className="flex items-center gap-2.5 bg-slate-50 border border-slate-200/90 px-3.5 py-1.5 rounded-full shadow-2xs">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#26d4a5] animate-pulse" />
-              <div className="text-left hidden sm:block">
-                <span className="text-[11px] font-bold text-slate-800 block leading-tight">
-                  {currentUser?.name || 'Petugas Kasir'}
-                </span>
-                <span className="text-[9px] text-[#0fa882] font-semibold block leading-none">
-                  {currentUser?.roleLabel || 'Kasir & Billing'}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
-
+    <div className="min-h-screen bg-[#f8fafc] text-slate-800 font-['Poppins',sans-serif] flex flex-col antialiased pb-12 w-full">
+      
       {/* TOAST NOTIFIKASI */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 bg-slate-900/95 backdrop-blur-md text-white px-4 py-3 rounded-2xl shadow-xl flex items-center gap-3 animate-in fade-in slide-in-from-bottom-3 duration-200 border border-slate-700 text-xs font-semibold">
@@ -217,8 +175,8 @@ export default function KasirBillingPage() {
         </div>
       )}
 
-      {/* 2. SUB-BANNER TABS & STATISTIK KASIR */}
-      <section className="bg-white border-b border-slate-200/80 px-4 sm:px-6 lg:px-8 xl:px-10 py-3 shadow-2xs print:hidden">
+      {/* 1. SUB-BANNER TABS & STATISTIK KASIR */}
+      <section className="bg-white border-b border-slate-200/80 px-4 sm:px-6 lg:px-8 xl:px-10 py-3.5 shadow-2xs print:hidden">
         <div className="max-w-[1440px] w-full mx-auto flex flex-wrap items-center justify-between gap-4">
           <div className="flex bg-slate-100 p-1 rounded-2xl text-xs font-bold w-full sm:w-auto">
             <button
@@ -259,7 +217,7 @@ export default function KasirBillingPage() {
         </div>
       </section>
 
-      {/* 3. WORKSPACE KONTEN UTAMA */}
+      {/* 2. WORKSPACE KONTEN UTAMA */}
       <main className="max-w-[1440px] w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 py-6 flex-1 print:hidden">
         {activeTab === 'billing' ? (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -563,7 +521,7 @@ export default function KasirBillingPage() {
         )}
       </main>
 
-      {/* 4. STRUK KASIR CETAK TERMAL 80MM (HANYA AKTIF SAAT WINDOW.PRINT) */}
+      {/* 3. STRUK KASIR CETAK TERMAL 80MM (HANYA AKTIF SAAT WINDOW.PRINT) */}
       {completedInvoice && (
         <InvoiceReceipt invoiceData={completedInvoice} />
       )}

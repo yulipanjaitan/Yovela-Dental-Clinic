@@ -7,8 +7,8 @@ import {
   saveStoredPatients, 
   setActivePatient, 
   PatientRecord 
-} from '../../data/patientDatabase';
-import { useAuth } from '../../context/AuthContext';
+} from '../../../data/patientDatabase';
+import { useAuth } from '../../../context/AuthContext';
 
 export default function PendaftaranPasienPage() {
   const { currentUser } = useAuth();
@@ -158,54 +158,8 @@ export default function PendaftaranPasienPage() {
   const inProgressCount = patients.filter((p) => p.statusKunjungan === 'Sedang Diperiksa').length;
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-slate-800 font-['Poppins',sans-serif] flex flex-col antialiased pb-12">
-      {/* 1. TOP HEADER BRANDED */}
-      <header className="bg-white/95 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-40 px-4 sm:px-6 lg:px-8 xl:px-10 py-3 shadow-xs print:hidden">
-        <div className="max-w-[1440px] w-full mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href="/" className="flex items-center gap-2.5 group cursor-pointer" title="Kembali ke Pemeriksaan Poli">
-              <div className="w-9 h-9 rounded-xl bg-[#26d4a5]/15 border border-[#26d4a5]/30 flex items-center justify-center p-2 group-hover:scale-105 transition duration-200 shadow-2xs">
-                <svg viewBox="0 0 512 512" className="w-full h-full fill-[#26d4a5]">
-                  <path d="M416 112c-35.3 0-64 28.7-64 64v51.2c0 23.4-12.2 44.9-32.3 56.8L272 312.6l-47.7-28.6c-20.1-12-32.3-33.5-32.3-56.8V176c0-35.3-28.7-64-64-64S64 140.7 64 176c0 86.8 52.3 162.7 128 193.3V432c0 17.7 14.3 32 32 32h64c17.7 0 32-14.3 32-32V369.3c75.7-30.6 128-106.5 128-193.3c0-35.3-28.7-64-64-64z" />
-                </svg>
-              </div>
-              <div>
-                <h1 className="text-sm font-extrabold tracking-tight text-slate-900 group-hover:text-[#20b88f] transition">
-                  Yovela Dental Clinic
-                </h1>
-                <p className="text-[10px] text-slate-400 font-medium">Front Office • Modul Pendaftaran & Rekam Medis</p>
-              </div>
-            </Link>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Link
-              href="/antrean"
-              className="px-3.5 py-1.5 rounded-xl border border-slate-200 hover:border-[#26d4a5] bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center gap-2 transition cursor-pointer shadow-2xs"
-            >
-              <i className="fa-solid fa-clock-rotate-left text-[#0fa882]" />
-              <span>Antrean Poli</span>
-              <span className="bg-[#26d4a5]/20 text-[#0fa882] px-2 py-0.5 rounded-full text-[10px] font-black">
-                {waitingCount}
-              </span>
-            </Link>
-
-            {/* Profil Staf Login */}
-            <div className="flex items-center gap-2.5 bg-slate-50 border border-slate-200/90 px-3.5 py-1.5 rounded-full shadow-2xs">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#26d4a5] animate-pulse" />
-              <div className="text-left hidden sm:block">
-                <span className="text-[11px] font-bold text-slate-800 block leading-tight">
-                  {currentUser?.name || 'Petugas Front Office'}
-                </span>
-                <span className="text-[9px] text-[#0fa882] font-semibold block leading-none">
-                  {currentUser?.roleLabel || 'Pendaftaran'}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
-
+    <div className="min-h-screen bg-[#f8fafc] text-slate-800 font-['Poppins',sans-serif] flex flex-col antialiased pb-12 w-full">
+      
       {/* TOAST SUKSES MENGAMBANG */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 bg-slate-900/95 backdrop-blur-md text-white px-4 py-3 rounded-2xl shadow-xl flex items-center gap-3 animate-in fade-in slide-in-from-bottom-3 duration-200 border border-slate-700 text-xs font-semibold">
@@ -216,8 +170,8 @@ export default function PendaftaranPasienPage() {
         </div>
       )}
 
-      {/* 2. SUB-BANNER STATISTIK & PILIHAN MODE */}
-      <section className="bg-white border-b border-slate-200/80 px-4 sm:px-6 lg:px-8 xl:px-10 py-3 shadow-2xs print:hidden">
+      {/* 1. SUB-BANNER STATISTIK & PILIHAN MODE */}
+      <section className="bg-white border-b border-slate-200/80 px-4 sm:px-6 lg:px-8 xl:px-10 py-3.5 shadow-2xs print:hidden">
         <div className="max-w-[1440px] w-full mx-auto flex flex-wrap items-center justify-between gap-4">
           {/* Mode Switcher Interaktif */}
           <div className="flex bg-slate-100 p-1 rounded-2xl text-xs font-bold w-full sm:w-auto">
@@ -265,17 +219,14 @@ export default function PendaftaranPasienPage() {
         </div>
       </section>
 
-      {/* 3. WORKSPACE KONTEN UTAMA */}
+      {/* 2. WORKSPACE KONTEN UTAMA */}
       <main className="max-w-[1440px] w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 py-6 flex-1 print:hidden">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           
-          {/* =========================================================================
-              KOLOM KIRI (7 Kolom): FORMULIR PASIEN BARU / DAFTAR PASIEN DATABASE
-             ========================================================================= */}
+          {/* KOLOM KIRI (7 Kolom): FORMULIR PASIEN BARU / DAFTAR PASIEN DATABASE */}
           <div className="lg:col-span-7 space-y-4">
             {mode === 'baru' ? (
               <form onSubmit={handleRegisterNewPatient} className="bg-white rounded-3xl border border-slate-200/90 shadow-xs p-6 space-y-5 animate-in fade-in duration-150">
-                {/* Header Formulir */}
                 <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                   <div className="flex items-center gap-2.5">
                     <div className="w-8 h-8 rounded-xl bg-[#26d4a5]/15 text-[#20b88f] flex items-center justify-center text-xs shadow-2xs">
@@ -293,7 +244,6 @@ export default function PendaftaranPasienPage() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                  {/* Nama Pasien */}
                   <div className="sm:col-span-2">
                     <label className="block font-semibold text-slate-700 mb-1">
                       Nama Lengkap Pasien <span className="text-rose-500">*</span>
@@ -308,7 +258,6 @@ export default function PendaftaranPasienPage() {
                     />
                   </div>
 
-                  {/* NIK Pasien */}
                   <div>
                     <label className="block font-semibold text-slate-700 mb-1">
                       Nomor Induk Kependudukan (NIK 16 Digit)
@@ -328,7 +277,6 @@ export default function PendaftaranPasienPage() {
                     </div>
                   </div>
 
-                  {/* No WhatsApp */}
                   <div>
                     <label className="block font-semibold text-slate-700 mb-1">
                       No. WhatsApp / HP <span className="text-rose-500">*</span>
@@ -343,7 +291,6 @@ export default function PendaftaranPasienPage() {
                     />
                   </div>
 
-                  {/* Tanggal Lahir */}
                   <div>
                     <label className="block font-semibold text-slate-700 mb-1">
                       Tanggal Lahir
@@ -356,7 +303,6 @@ export default function PendaftaranPasienPage() {
                     />
                   </div>
 
-                  {/* Usia & Jenis Kelamin */}
                   <div className="grid grid-cols-2 gap-2">
                     <div>
                       <label className="block font-semibold text-slate-700 mb-1">
@@ -403,7 +349,6 @@ export default function PendaftaranPasienPage() {
                     </div>
                   </div>
 
-                  {/* Alamat Tempat Tinggal */}
                   <div className="sm:col-span-2">
                     <label className="block font-semibold text-slate-700 mb-1">
                       Alamat Tempat Tinggal
@@ -417,7 +362,6 @@ export default function PendaftaranPasienPage() {
                     />
                   </div>
 
-                  {/* Riwayat Alergi Interaktif */}
                   <div className="sm:col-span-2 bg-slate-50 p-3 rounded-2xl border border-slate-200/80 space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="font-semibold text-slate-700 flex items-center gap-1.5">
@@ -452,7 +396,6 @@ export default function PendaftaranPasienPage() {
                     )}
                   </div>
 
-                  {/* Keluhan Pasien Saat Mendaftar */}
                   <div className="sm:col-span-2">
                     <label className="block font-semibold text-slate-700 mb-1">
                       Keluhan Utama Pasien (Anamnesis Awal):
@@ -467,7 +410,6 @@ export default function PendaftaranPasienPage() {
                   </div>
                 </div>
 
-                {/* Footer Submit */}
                 <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
                   <span className="text-[11px] text-slate-500 flex items-center gap-1.5">
                     <i className="fa-solid fa-user-check text-[#0fa882]" />
@@ -484,7 +426,6 @@ export default function PendaftaranPasienPage() {
                 </div>
               </form>
             ) : (
-              /* TAB PENCARIAN PASIEN LAMA DARI DATABASE */
               <div className="bg-white rounded-3xl border border-slate-200/90 shadow-xs p-6 space-y-4 animate-in fade-in duration-150">
                 <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
                   <div>
@@ -558,11 +499,8 @@ export default function PendaftaranPasienPage() {
             )}
           </div>
 
-          {/* =========================================================================
-              KOLOM KANAN (5 Kolom): TIKET PRATINJAU DINAMIS & PANDUAN PETUGAS
-             ========================================================================= */}
+          {/* KOLOM KANAN (5 Kolom): TIKET PRATINJAU DINAMIS & PANDUAN PETUGAS */}
           <div className="lg:col-span-5 space-y-4">
-            {/* KARTU TIKET ANTREAN INTERAKTIF */}
             <div className="bg-white rounded-3xl border border-slate-200/90 shadow-md p-6 relative overflow-hidden">
               <div className="absolute -right-8 -top-8 w-32 h-32 rounded-full bg-[#26d4a5]/10 pointer-events-none" />
 
@@ -578,7 +516,6 @@ export default function PendaftaranPasienPage() {
                 </span>
               </div>
 
-              {/* Tampilan Nomor Antrean Beranimasi */}
               <div className="text-center py-4 bg-gradient-to-b from-slate-50 to-slate-100/70 rounded-2xl border border-slate-200/90 my-2 shadow-inner">
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 block mb-1">
                   Nomor Panggilan Pasien
@@ -594,7 +531,6 @@ export default function PendaftaranPasienPage() {
                 </p>
               </div>
 
-              {/* Rincian Poli & Dokter */}
               <div className="mt-4 space-y-2 text-xs text-slate-600">
                 <div className="flex justify-between py-1.5 border-b border-slate-100">
                   <span className="text-slate-400">Instalasi / Poli:</span>
@@ -616,7 +552,6 @@ export default function PendaftaranPasienPage() {
                 </div>
               </div>
 
-              {/* Tombol Cetak / Navigasi Display TV */}
               <div className="mt-5 pt-3 border-t border-slate-100 flex gap-2.5">
                 <button
                   type="button"
@@ -644,7 +579,6 @@ export default function PendaftaranPasienPage() {
               </div>
             </div>
 
-            {/* Panduan RME & SATUSEHAT */}
             <div className="bg-[#26d4a5]/10 border border-[#26d4a5]/30 rounded-3xl p-4 flex items-start gap-3.5">
               <div className="w-8 h-8 rounded-xl bg-[#26d4a5]/20 text-[#0fa882] flex items-center justify-center text-sm shrink-0 mt-0.5 shadow-2xs">
                 <i className="fa-solid fa-cloud-arrow-up" />
@@ -661,9 +595,6 @@ export default function PendaftaranPasienPage() {
         </div>
       </main>
 
-      {/* =========================================================================
-          4. STRUK CETAK TIKET ANTREAN 80MM (HANYA AKTIF SAAT WINDOW.PRINT)
-         ========================================================================= */}
       {ticketModalData && (
         <aside
           aria-label="Tiket Antrean Pasien"

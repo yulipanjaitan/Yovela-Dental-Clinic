@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { getStoredPatients, PatientRecord } from '../../data/patientDatabase';
+import { getStoredPatients, PatientRecord } from '../../../data/patientDatabase';
 
 export default function DisplayAntreanPage() {
   const [currentCall, setCurrentCall] = useState({

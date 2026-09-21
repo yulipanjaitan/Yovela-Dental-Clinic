@@ -1,26 +1,25 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useRef } from 'react';
-import Link from 'next/link';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Tooth, 
   ToothSurface, 
   GeneralToothCondition, 
   ToothData 
-} from '../components/Odontogram';
-import { InvoiceReceipt } from '../components/InvoiceReceipt';
-import { TREATMENTS, DIAGNOSES, Treatment } from '../data/mockData';
+} from '../../../components/Odontogram';
+import { InvoiceReceipt } from '../../../components/InvoiceReceipt';
+import { TREATMENTS, DIAGNOSES, Treatment } from '../../../data/mockData';
 import { 
   PatientRecord, 
   getStoredPatients, 
   saveStoredPatients, 
   getActivePatient, 
   setActivePatient 
-} from '../data/patientDatabase';
-import { useAuth, AccountData } from '../context/AuthContext';
+} from '../../../data/patientDatabase';
+import { useAuth } from '../../../context/AuthContext';
 
 export default function DentalClinicDashboard() {
-  const { currentUser, logout, accounts, updateAccounts } = useAuth();
+  const { currentUser } = useAuth();
 
   const activeDoctorName = currentUser?.role === 'DOKTER' 
     ? currentUser.name 
@@ -30,15 +29,11 @@ export default function DentalClinicDashboard() {
     ? currentUser.roleLabel
     : 'Dokter Gigi Umum';
 
-  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
-  const [showSettingsModal, setShowSettingsModal] = useState(false);
-  const [accountFormData, setAccountFormData] = useState<Record<string, AccountData>>({});
-  const [saveSuccessMsg, setSaveSuccessMsg] = useState('');
-  const profileMenuRef = useRef<HTMLDivElement>(null);
-
   const [patientList, setPatientList] = useState<PatientRecord[]>([]);
   const [selectedPatient, setSelectedPatient] = useState<PatientRecord | null>(null);
   const [activeTab, setActiveTab] = useState<'soap' | 'billing' | 'history'>('soap');
+
+  const [searchQuery, setSearchQuery] = useState('');
 
   const q1 = [18, 17, 16, 15, 14, 13, 12, 11];
   const q2 = [21, 22, 23, 24, 25, 26, 27, 28];
@@ -68,23 +63,6 @@ export default function DentalClinicDashboard() {
   const [isCallingTV, setIsCallingTV] = useState(false);
 
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
-        setIsProfileMenuOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  useEffect(() => {
-    if (showSettingsModal && accounts) {
-      setAccountFormData(JSON.parse(JSON.stringify(accounts)));
-      setSaveSuccessMsg('');
-    }
-  }, [showSettingsModal, accounts]);
-
-  useEffect(() => {
     const list = getStoredPatients();
     setPatientList(list);
     const active = getActivePatient();
@@ -112,24 +90,14 @@ export default function DentalClinicDashboard() {
     if (chosen) loadPatientData(chosen);
   };
 
-  const handleAccountFieldChange = (key: string, field: keyof AccountData, value: string) => {
-    setAccountFormData((prev) => ({
-      ...prev,
-      [key]: {
-        ...prev[key],
-        [field]: value,
-      },
-    }));
-  };
+  const filteredPatients = useMemo(() => {
+    if (!searchQuery.trim()) return patientList;
+    const q = searchQuery.toLowerCase();
+    return patientList.filter(
+      (p) => p.name.toLowerCase().includes(q) || p.rmNumber.toLowerCase().includes(q) || p.nik.includes(q)
+    );
+  }, [patientList, searchQuery]);
 
-  const handleSaveAccounts = (e: React.FormEvent) => {
-    e.preventDefault();
-    updateAccounts(accountFormData);
-    setSaveSuccessMsg('Pengaturan akun pengguna dan kata sandi berhasil diperbarui.');
-    setTimeout(() => setSaveSuccessMsg(''), 3000);
-  };
-
-  // Sinkronisasi otomatis Odontogram -> SOAP Objective
   const syncOdontogramToSoap = (currentOdonto: Record<number, ToothData>) => {
     const findings: string[] = [];
     let detectedDiagnosis = diagnosis;
@@ -193,7 +161,6 @@ export default function DentalClinicDashboard() {
     return { d, m, f, total: d + m + f };
   }, [odontogram]);
 
-  // TOGGLE KLIK WARNA: Jika warna sama diklik kembali, otomatis kembali normal (null)
   const handleSurfaceClick = (tooth: number, surface: ToothSurface) => {
     setOdontogram((prev) => {
       const current = prev[tooth] || {
@@ -202,7 +169,7 @@ export default function DentalClinicDashboard() {
       };
 
       const existingColor = current.surfaces[surface];
-      const nextColor = selectedSurfaceColor === 'clear' || existingColor === selectedSurfaceColor 
+      const nextColor = existingColor === selectedSurfaceColor 
         ? null 
         : selectedSurfaceColor;
 
@@ -324,114 +291,45 @@ export default function DentalClinicDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-slate-800 font-['Poppins',sans-serif] flex flex-col antialiased pb-12">
-      {/* 1. TOP HEADER */}
-      <header className="bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-6 lg:px-8 xl:px-10 py-2.5 shadow-xs z-40 print:hidden">
-        <div className="max-w-[1440px] w-full mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href="/" className="flex items-center gap-2.5 group cursor-pointer" title="Beranda Utama">
-              <div className="w-8 h-8 rounded-xl bg-[#26d4a5]/15 border border-[#26d4a5]/30 flex items-center justify-center p-1.5 group-hover:scale-105 transition duration-200 shadow-2xs">
-                <svg viewBox="0 0 512 512" className="w-full h-full fill-[#26d4a5]">
-                  <path d="M416 112c-35.3 0-64 28.7-64 64v51.2c0 23.4-12.2 44.9-32.3 56.8L272 312.6l-47.7-28.6c-20.1-12-32.3-33.5-32.3-56.8V176c0-35.3-28.7-64-64-64S64 140.7 64 176c0 86.8 52.3 162.7 128 193.3V432c0 17.7 14.3 32 32 32h64c17.7 0 32-14.3 32-32V369.3c75.7-30.6 128-106.5 128-193.3c0-35.3-28.7-64-64-64z" />
-                </svg>
-              </div>
-              <div>
-                <h1 className="text-sm font-extrabold tracking-tight text-slate-900 group-hover:text-[#20b88f] transition">
-                  Yovela Dental Clinic
-                </h1>
-                <p className="text-[10px] text-slate-400 font-medium">Instalasi Rekam Medis Odontologi • Poli 01</p>
-              </div>
-            </Link>
-          </div>
-
-          <div className="relative" ref={profileMenuRef}>
-            <button
-              type="button"
-              onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-              className="flex items-center gap-2.5 bg-slate-50 hover:bg-slate-100/80 border border-slate-200/90 px-3 py-1.5 rounded-full transition duration-150 cursor-pointer shadow-2xs"
-            >
-              <span className="w-2.5 h-2.5 rounded-full bg-[#26d4a5] animate-pulse" />
-              <div className="text-left hidden sm:block">
-                <span className="text-xs font-bold text-slate-800 block leading-tight">{activeDoctorName}</span>
-                <span className="text-[9px] text-[#0fa882] font-semibold block">{activeDoctorLabel}</span>
-              </div>
-              <i className={`fa-solid fa-chevron-down text-slate-400 text-[10px] ml-1 transition-transform duration-200 ${isProfileMenuOpen ? 'rotate-180' : ''}`} />
-            </button>
-
-            {isProfileMenuOpen && (
-              <div className="absolute right-0 mt-2 w-64 bg-white border border-slate-200 rounded-2xl shadow-xl py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
-                <div className="px-4 py-2.5 border-b border-slate-100">
-                  <p className="text-xs font-bold text-slate-900">{activeDoctorName}</p>
-                  <p className="text-[10px] text-slate-400 font-mono mt-0.5">SIP: 503/449/DRG/2026</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowSettingsModal(true);
-                    setIsProfileMenuOpen(false);
-                  }}
-                  className="w-full px-4 py-2 text-left text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2.5 transition cursor-pointer"
-                >
-                  <i className="fa-solid fa-users-gear text-slate-400 text-xs w-4" />
-                  <span>Pengaturan User & Password</span>
-                </button>
-                <div className="my-1 border-t border-slate-100" />
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsProfileMenuOpen(false);
-                    logout();
-                  }}
-                  className="w-full px-4 py-2 text-left text-xs text-rose-600 hover:bg-rose-50 flex items-center gap-2.5 transition cursor-pointer font-medium"
-                >
-                  <i className="fa-solid fa-arrow-right-from-bracket text-xs w-4" />
-                  <span>Keluar dari Sesi (Logout)</span>
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </header>
-
-      {/* 2. BANNER PASIEN STICKY */}
-      <section className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-6 lg:px-8 xl:px-10 py-2.5 shadow-xs print:hidden">
-        <div className="max-w-[1440px] w-full mx-auto flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
+    <div className="flex flex-col w-full min-h-full">
+      {/* BANNER PASIEN & PENCARIAN */}
+      <section className="bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-6 py-3 shadow-2xs print:hidden w-full">
+        <div className="w-full mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#26d4a5]/25 to-[#26d4a5]/10 border border-[#26d4a5]/40 flex items-center justify-center text-[#0fa882] font-black text-xs font-mono shrink-0 shadow-2xs">
               {selectedPatient?.queueNumber || 'A-01'}
             </div>
 
-            <div className="relative min-w-[260px]">
+            <div className="relative min-w-[260px] flex-1 sm:flex-none">
               <select
                 value={selectedPatient?.id || ''}
                 onChange={handleSelectPatient}
-                className="w-full pl-3 pr-8 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-white text-xs font-bold text-slate-800 outline-none focus:border-[#26d4a5] cursor-pointer appearance-none transition shadow-2xs truncate"
+                className="w-full pl-3 pr-8 py-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-white text-xs font-bold text-slate-800 outline-none focus:border-[#26d4a5] cursor-pointer appearance-none transition shadow-2xs truncate"
               >
-                {patientList.map((p) => (
+                {filteredPatients.map((p) => (
                   <option key={p.id} value={p.id}>
                     [{p.queueNumber}] {p.name} ({p.age} th) - {p.rmNumber}
                   </option>
                 ))}
               </select>
-              <i className="fa-solid fa-chevron-down text-slate-400 text-[10px] absolute right-3 top-2.5 pointer-events-none" />
+              <i className="fa-solid fa-chevron-down text-slate-400 text-[10px] absolute right-3 top-3 pointer-events-none" />
             </div>
 
-            {selectedPatient && (
-              <div className="hidden md:flex items-center gap-2 text-xs text-slate-500">
-                <span>NIK: <strong className="font-mono text-slate-700">{selectedPatient.nik}</strong></span>
-                <span className="text-slate-300">•</span>
-                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold border ${
-                  selectedPatient.allergies !== 'Tidak Ada'
-                    ? 'text-rose-600 bg-rose-50 border-rose-200'
-                    : 'text-emerald-700 bg-emerald-50 border-emerald-200'
-                }`}>
-                  Alergi: {selectedPatient.allergies}
-                </span>
-              </div>
-            )}
+            <div className="relative min-w-[220px] flex-1 sm:flex-none">
+              <span className="absolute left-3 top-2.5 text-slate-400 text-xs">
+                <i className="fa-solid fa-magnifying-glass" />
+              </span>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Cari nama pasien / No. RM..."
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-800 font-medium focus:outline-none focus:border-[#26d4a5] focus:bg-white transition"
+              />
+            </div>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2.5 self-end md:self-center">
             <button
               type="button"
               onClick={triggerCallToTV}
@@ -458,14 +356,12 @@ export default function DentalClinicDashboard() {
         </div>
       </section>
 
-      {/* 3. DUAL WORKSPACE: TINGGI OTOMATIS FIT (BEBAS RUANG KOSONG) */}
-      <main className="max-w-[1440px] w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 py-5 flex-1 print:hidden">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      {/* WORKSPACE UTAMA */}
+      <main className="w-full px-6 py-5 flex-1 print:hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start w-full">
           
-          {/* KOLOM KIRI (7 Kolom): Odontogram Digital */}
+          {/* ODONTOGRAM */}
           <section className="lg:col-span-7 bg-white rounded-3xl border border-slate-200/90 shadow-xs p-5 flex flex-col">
-            
-            {/* Header Odontogram, Palet & Legenda Simbol */}
             <div className="pb-3 border-b border-slate-100 bg-white space-y-2.5">
               <div className="flex flex-wrap justify-between items-center gap-2">
                 <div className="flex items-center gap-2">
@@ -509,15 +405,13 @@ export default function DentalClinicDashboard() {
                 </div>
               </div>
 
-              {/* Palet Tool Tambalan: Grid 6 Kolom Simetris */}
-              <div className="bg-slate-50/90 p-1.5 rounded-2xl border border-slate-200/90 shadow-2xs grid grid-cols-6 gap-1.5">
+              <div className="bg-slate-50/90 p-1.5 rounded-2xl border border-slate-200/90 shadow-2xs grid grid-cols-5 gap-1.5">
                 {[
                   { id: 'caries', label: 'Karies', color: 'bg-rose-500 text-white hover:bg-rose-600' },
                   { id: 'composite', label: 'Komposit', color: 'bg-[#26d4a5] text-slate-950 font-bold hover:bg-[#20b88f]' },
                   { id: 'amalgam', label: 'Amalgam', color: 'bg-slate-600 text-white hover:bg-slate-700' },
                   { id: 'gic', label: 'GIC / Sealant', color: 'bg-emerald-600 text-white hover:bg-emerald-700' },
                   { id: 'temporary', label: 'Sementara', color: 'bg-amber-500 text-white hover:bg-amber-600' },
-                  { id: 'clear', label: 'Bersihkan', color: 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100' },
                 ].map((tool) => {
                   const isSelected = selectedSurfaceColor === tool.id;
                   return (
@@ -525,7 +419,7 @@ export default function DentalClinicDashboard() {
                       key={tool.id}
                       type="button"
                       onClick={() => setSelectedSurfaceColor(tool.id)}
-                      className={`w-full py-1 text-[10px] font-semibold rounded-xl text-center whitespace-nowrap cursor-pointer transition-all duration-150 flex items-center justify-center gap-1 ${
+                      className={`w-full py-1.5 text-[10px] font-semibold rounded-xl text-center whitespace-nowrap cursor-pointer transition-all duration-150 flex items-center justify-center gap-1 ${
                         tool.color
                       } ${
                         isSelected
@@ -533,27 +427,23 @@ export default function DentalClinicDashboard() {
                           : 'opacity-90 hover:opacity-100 hover:-translate-y-0.5'
                       }`}
                     >
-                      {tool.id === 'clear' && <i className="fa-solid fa-eraser text-[9px]" />}
                       <span>{tool.label}</span>
                     </button>
                   );
                 })}
               </div>
 
-              {/* Legenda Simbol di Atas */}
               <div className="flex flex-wrap items-center justify-between gap-2 px-1 text-[10px] text-slate-500 pt-0.5">
                 <div className="flex items-center gap-3">
                   <span className="flex items-center gap-1"><span className="w-2 h-2 bg-rose-500 rounded-xs" /> Karies</span>
                   <span className="flex items-center gap-1"><span className="w-2 h-2 bg-[#26d4a5] rounded-xs" /> Komposit</span>
                   <span className="flex items-center gap-1"><strong className="text-rose-600 font-bold">X</strong> Missing</span>
                   <span className="flex items-center gap-1"><strong className="text-amber-600 font-bold">R</strong> Radix</span>
-                  <span className="flex items-center gap-1"><strong className="text-blue-600 font-bold">|</strong> PSA/Endo</span>
                 </div>
-                <span className="text-[#0fa882] font-semibold text-[9px]">*Klik nomor gigi untuk catatan</span>
+                <span className="text-[#0fa882] font-semibold text-[9px]">*Klik warna yang sama untuk menghapus</span>
               </div>
             </div>
 
-            {/* Papan Gigi FDI: Rapat ke Bawah Tanpa Ruang Kosong */}
             <div className="overflow-x-auto p-4 bg-slate-50/60 rounded-2xl border border-slate-200 shadow-inner mt-3">
               <div className="min-w-[580px] space-y-4">
                 {(dentitionView === 'adult' || dentitionView === 'mixed') && (
@@ -629,10 +519,8 @@ export default function DentalClinicDashboard() {
             </div>
           </section>
 
-          {/* KOLOM KANAN (5 Kolom): SOAP & Tindakan */}
+          {/* SOAP & BILLING */}
           <section className="lg:col-span-5 bg-white rounded-3xl border border-slate-200/90 shadow-xs p-5 flex flex-col">
-            
-            {/* Header Tab SOAP */}
             <div className="pb-3 border-b border-slate-100 bg-white">
               <div className="flex bg-slate-100 p-1 rounded-2xl text-xs font-bold">
                 <button
@@ -668,7 +556,6 @@ export default function DentalClinicDashboard() {
               </div>
             </div>
 
-            {/* Area Isi Form */}
             <div className="py-3 space-y-3.5 text-xs">
               {activeTab === 'soap' && (
                 <div className="space-y-3.5 animate-in fade-in duration-150">
@@ -764,7 +651,6 @@ export default function DentalClinicDashboard() {
               )}
             </div>
 
-            {/* Total Billing & Tombol Aksi */}
             <div className="pt-3 border-t border-slate-100 space-y-2.5 bg-white">
               <div className="flex justify-between items-baseline bg-slate-50 p-2.5 rounded-2xl border border-slate-200">
                 <span className="text-xs font-bold text-slate-600">Total Tagihan:</span>
@@ -801,123 +687,7 @@ export default function DentalClinicDashboard() {
         </div>
       </main>
 
-      {/* 4. MODAL SETTINGS USER/PASSWORD */}
-      {showSettingsModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 print:hidden">
-          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 space-y-5 animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] flex flex-col">
-            <div className="flex justify-between items-center border-b border-slate-100 pb-3 shrink-0">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-[#26d4a5]/15 text-[#20b88f] flex items-center justify-center text-sm">
-                  <i className="fa-solid fa-users-gear" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-slate-900 text-sm">
-                    Pengaturan Pengguna & Kata Sandi Seluruh Staf
-                  </h3>
-                  <p className="text-[10px] text-slate-400">
-                    Kelola nama, username, dan kata sandi seluruh peran (Dokter, Pendaftaran, Kasir)
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowSettingsModal(false)}
-                className="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center transition cursor-pointer"
-              >
-                <i className="fa-solid fa-xmark text-sm" />
-              </button>
-            </div>
-
-            {saveSuccessMsg && (
-              <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl text-xs font-semibold flex items-center gap-2">
-                <i className="fa-solid fa-circle-check text-emerald-600" />
-                <span>{saveSuccessMsg}</span>
-              </div>
-            )}
-
-            <form onSubmit={handleSaveAccounts} className="flex-1 overflow-y-auto pr-1 space-y-4 text-xs">
-              {Object.keys(accountFormData).map((key) => {
-                const acc = accountFormData[key];
-                return (
-                  <div key={key} className="p-4 rounded-2xl border border-slate-200 bg-slate-50/70 space-y-3">
-                    <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                      <div className="flex items-center gap-2">
-                        <span className={`w-2 h-2 rounded-full ${
-                          acc.role === 'DOKTER' ? 'bg-[#26d4a5]' : acc.role === 'KASIR' ? 'bg-amber-500' : 'bg-blue-500'
-                        }`} />
-                        <span className="font-bold text-slate-800 uppercase tracking-wider text-[11px]">
-                          Role: {acc.role} ({acc.roleLabel})
-                        </span>
-                      </div>
-                      <span className="text-[10px] font-mono text-slate-400 font-semibold">{acc.id}</span>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      <div>
-                        <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                          Nama Lengkap / Petugas:
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={acc.name}
-                          onChange={(e) => handleAccountFieldChange(key, 'name', e.target.value)}
-                          className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-800 font-semibold focus:outline-none focus:border-[#26d4a5] transition"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                          Username Login:
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={acc.username}
-                          onChange={(e) => handleAccountFieldChange(key, 'username', e.target.value)}
-                          className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-800 font-mono font-medium focus:outline-none focus:border-[#26d4a5] transition"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                          Kata Sandi (Password):
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={acc.pass}
-                          onChange={(e) => handleAccountFieldChange(key, 'pass', e.target.value)}
-                          className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-mono font-bold focus:outline-none focus:border-[#26d4a5] transition"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-
-              <div className="flex justify-end gap-2 pt-2 shrink-0 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => setShowSettingsModal(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition cursor-pointer"
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 rounded-xl text-xs font-bold bg-[#26d4a5] hover:bg-[#20b88f] text-slate-950 transition shadow-sm cursor-pointer flex items-center gap-1.5"
-                >
-                  <i className="fa-solid fa-floppy-disk" />
-                  <span>Simpan Perubahan Akun</span>
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* 5. MODAL ANOTASI GIGI */}
+      {/* MODAL ANOTASI GIGI */}
       {activeToothModal !== null && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 print:hidden">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
@@ -990,7 +760,7 @@ export default function DentalClinicDashboard() {
         </div>
       )}
 
-      {/* 6. STRUK KASIR CETAK TERMAL 80MM */}
+      {/* STRUK KASIR */}
       {selectedPatient && (
         <InvoiceReceipt
           invoiceData={{

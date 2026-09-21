@@ -38,10 +38,11 @@ export default function LoginPage() {
 
     // Proses Sign In
     const res = loginWithCredentials(username, password);
-    if (res.success) {
-      router.push('/');
+    if (res && res.success) {
+      // Menggunakan router.replace agar halaman login tidak menumpuk di riwayat history browser
+      router.replace('/');
     } else {
-      setErrorMsg(res.message || 'Login gagal');
+      setErrorMsg(res?.message || 'Login gagal. Periksa kembali username dan kata sandi Anda.');
     }
   };
 
@@ -166,6 +167,7 @@ export default function LoginPage() {
                   onChange={(e) => setUsername(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-3.5 py-2.5 text-white font-medium focus:outline-none focus:border-[#26d4a5] transition"
                   autoComplete="off"
+                  placeholder="Masukkan username..."
                 />
               </div>
             </div>
@@ -183,6 +185,7 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-3.5 py-2.5 text-white font-medium focus:outline-none focus:border-[#26d4a5] transition"
                   autoComplete="off"
+                  placeholder="••••••••"
                 />
               </div>
             </div>
@@ -201,6 +204,7 @@ export default function LoginPage() {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-3.5 py-2.5 text-white font-medium focus:outline-none focus:border-[#26d4a5] transition"
                     autoComplete="off"
+                    placeholder="••••••••"
                   />
                 </div>
               </div>
